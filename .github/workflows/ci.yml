@@ -1,0 +1,50 @@
+name: CI
+
+# 为什么要有这个文件：
+# 简历上写"有测试"是自述，仓库上有个绿色对勾是证据。老师点进仓库第一眼就能看到
+# 118 个用例在 Linux 上也能跑通——而不是"只在我自己那台 Windows 上能跑"。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # 连着推两次时，把上一次还没跑完的任务取消，省时间也省额度。
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+
+      # --frozen：严格按 uv.lock 装，锁文件与实际依赖不一致时直接失败，
+      # 而不是悄悄装个新版本让本地能跑、别人不能跑。
+      - name: 安装依赖
+        run: uv sync --frozen
+
+      - name: 静态检查
+        run: uv run ruff check app scripts tests
+
+      - name: 跑测试
+        run: uv run pytest -q
+
+      # 离线 demo 是答辩现场要用的那条命令，所以放进 CI 里守着——
+      # 一旦有人改坏了端到端链路，这里会先红。
+      - name: 离线演示（不需要 API Key）
+        run: uv run python scripts/demo_offline.py

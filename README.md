@@ -1,5 +1,10 @@
 # 待办事项智能体（基于大模型工具调用）
 
+[![CI](https://github.com/hhhsmallwhite/todo-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/hhhsmallwhite/todo-agent/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-blue)
+![Tests](https://img.shields.io/badge/tests-118%20passed-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 一句话定位：**用户说一句中文，模型自己决定调用哪个工具、用什么参数，程序执行完把结果回填给模型，模型再用人话回复。** 数据真实落在 SQLite 里，不是模型编的。
 
 这不是"套壳聊天"，重点全在**工具调用协议的那几个坑**上：`arguments` 是 JSON 字符串、`tool_call_id` 必须一一对应、参数校验失败要回传给模型而不是抛异常、流式 `tool_calls` 要按 `index` 拼参数串。

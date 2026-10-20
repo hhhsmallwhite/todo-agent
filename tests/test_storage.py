@@ -154,12 +154,21 @@ def test_created_at_is_sortable_iso_string(repo: TodoRepository) -> None:
 
 
 def test_failed_insert_rolls_back_and_leaves_no_partial_row(repo: TodoRepository) -> None:
-    """写失败必须回滚，不能留半条脏数据；连接也要能正常关闭（后续操作不受影响）。"""
-    with pytest.raises(sqlite3.ProgrammingError):
+    """写失败必须回滚，不能留半条脏数据；连接也要能正常关闭（后续操作不受影响）。
+
+    这里断言的是 ``sqlite3.Error`` 而不是某个具体子类，是踩过的坑：
+    同一个"把 dict 绑成 TEXT"的动作，**Python 3.10 抛 InterfaceError，
+    3.11+ 抛 ProgrammingError**，两者是兄弟不是父子。写死任一个都会让
+    CI 在另一个版本上红——而这条用例真正要证明的是"异常发生后回滚了"，
+    不是"驱动抛了哪个类"。（这个问题是 GitHub Actions 跑 3.10 矩阵时暴露的。）
+    """
+    with pytest.raises(sqlite3.Error):
         # sqlite3 不支持把 dict 绑成 TEXT，这里故意制造一次"驱动层异常"。
         repo.add(title={"不": "是字符串"})  # type: ignore[arg-type]
 
     assert repo.list() == []
+    # 回滚之后连接必须已经关闭，后续操作照常（`_session` 的 finally 里 close）
+    assert repo.add("回滚之后还能继续写").title == "回滚之后还能继续写"
 
 
 @pytest.mark.parametrize(

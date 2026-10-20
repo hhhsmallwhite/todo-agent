@@ -7,7 +7,11 @@
 
 一句话定位：**用户说一句中文，模型自己决定调用哪个工具、用什么参数，程序执行完把结果回填给模型，模型再用人话回复。** 数据真实落在 SQLite 里，不是模型编的。
 
-这不是"套壳聊天"，重点全在**工具调用协议的那几个坑**上：`arguments` 是 JSON 字符串、`tool_call_id` 必须一一对应、参数校验失败要回传给模型而不是抛异常、流式 `tool_calls` 要按 `index` 拼参数串。
+> **这是一个学习项目，不是产品。**
+> 代码能跑、有 CI、有 118 个用例，但这些是"我把这条链路走通了一遍"的证据，不是"我做了一个能上线的系统"。
+> 功能刻意做得很少（只有增、查、标记完成三个工具），时间全花在**协议细节**上：`arguments` 是 JSON 字符串、`tool_call_id` 必须一一对应、参数校验失败要回传给模型而不是抛异常、流式 `tool_calls` 要按 `index` 拼参数串。
+>
+> **我的思考过程、想错的地方、踩过的坑，都记在 → [LEARNING.md](LEARNING.md)**（这份日志比本文件更值得看）。
 
 ---
 
@@ -15,12 +19,17 @@
 
 ```
 todo-agent/
+├── LEARNING.md          ← 学习日志：我原来怎么想的、哪里想错了、踩过什么坑（建议先看这份）
 ├── README.md            本文件：怎么跑 + 技术点对照 + 已知边界
 ├── pyproject.toml       项目元数据 + 依赖声明（uv sync / ruff / pytest 的配置都在这）
 ├── uv.lock              uv 的锁文件：换台机器 uv sync 出来的环境一模一样
 ├── requirements.txt     依赖（给不用 uv 的人：pip install -r requirements.txt）
+├── LICENSE              MIT
 ├── .env.example         配置模板（只有占位符，复制成 .env 再填 Key）
 ├── .gitignore           忽略 .env / *.db / .venv / __pycache__ / .pytest_cache
+├── .gitattributes       统一换行符（仓库里一律 LF，避免 Windows 上 CRLF 入库）
+├── .github/workflows/
+│   └── ci.yml           CI：Ubuntu + Python 3.10/3.12 双版本跑 ruff / pytest / 离线 demo
 ├── app/
 │   ├── config.py        从 .env 读 API_KEY / BASE_URL / MODEL / DB_PATH / MAX_TURNS
 │   ├── models.py        全部 Pydantic v2 模型（field_validator + ConfigDict）

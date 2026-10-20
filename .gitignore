@@ -1,0 +1,30 @@
+# 密钥与本地配置：绝不入库
+.env
+.env.*
+!.env.example
+
+# SQLite 数据文件（含 WAL / SHM 附属文件）
+*.db
+*.db-wal
+*.db-shm
+*.sqlite3
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# 测试与类型检查缓存
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# 编辑器 / 系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

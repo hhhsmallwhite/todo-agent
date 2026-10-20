@@ -1,0 +1,32 @@
+[project]
+name = "todo-agent"
+version = "0.1.0"
+description = "基于大模型工具调用的待办事项智能体：工具 JSON Schema、Pydantic v2 校验失败回传、流式 tool_calls 分片拼接、FastAPI 同步路由、SQLite WAL"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "pydantic>=2.7",
+    "openai>=1.30",
+    "python-dotenv>=1.0",
+]
+
+# uv 的用法：uv sync（按 uv.lock 精确还原环境）→ uv run python scripts/demo_offline.py
+# 没装 uv 的人走 requirements.txt + venv 也完全一样，两条路是等价的。
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "httpx>=0.27",
+    "ruff>=0.8",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+# I(导入排序) + UP(现代写法) + E402(demo 脚本的 sys.path 特例) + BLE(宽捕获必须显式 noqa 说明理由)
+select = ["E4", "E7", "E9", "F", "I", "UP", "E402", "BLE"]
